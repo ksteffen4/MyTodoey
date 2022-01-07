@@ -57,7 +57,7 @@ class TodoListViewController: UITableViewController {
 
         let action = UIAlertAction(title: "Add Item", style: .default) { _ in
             print("Add button pressed")
-            if let text = textField?.text {
+            if let text = textField?.text, text != "" {
                 print("The following was entered: \(text)")
                 DispatchQueue.main.async {
                     self.itemArray.append(ItemEntry(text: text))
