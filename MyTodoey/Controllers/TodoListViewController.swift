@@ -6,12 +6,12 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
 
     
-    let defaults = UserDefaults.standard
-    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
 
@@ -20,6 +20,7 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         retrieveData()
     }
 
@@ -56,7 +57,10 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { _ in
             if let text = textField?.text, text != "" {
                 DispatchQueue.main.async {
-                    self.items.append(Item(text))
+                    let newItem = Item(context: self.context)
+                    newItem.title = text
+                    newItem.done = false
+                    self.items.append(newItem)
                     self.saveData()
                 }
             }
@@ -73,26 +77,21 @@ class TodoListViewController: UITableViewController {
     //MARK: - save and retrive data from storage
     
     func saveData() {
-        let encoder = PropertyListEncoder()
         do {
-            let data = try encoder.encode(self.items)
-            try data.write(to: self.dataFilePath!)
+            try context.save()
         } catch {
-            print("Error encoding item array: \(error)")
+            print("Could not save context: \(error)")
         }
         tableView.reloadData()
     }
     
     func retrieveData() {
-        
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                items = try decoder.decode([Item].self, from: data)
-            } catch {
-                print("Error on decode: \(error)")
-                items = []
-            }
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            items = try context.fetch(request)
+            tableView.reloadData()
+        } catch {
+            print("Error fetching data: \(error)")
         }
     }
 }
