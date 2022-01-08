@@ -38,13 +38,14 @@ class TodoListViewController: UITableViewController {
         return cell
     }
 
-    //MARK: - override methods for list item selection
+    //MARK: - override method for list item selection
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         items[indexPath.row].done.toggle()
+ //       context.delete(items[indexPath.row])
+ //       items.remove(at: indexPath.row)
         saveData()
-        
     }
     
     //MARK: - Process add item button
